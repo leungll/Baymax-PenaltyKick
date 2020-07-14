@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>BayMax点球大战</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		#tool {
+			position: absolute;
+			top: 0px;
+			right: 0px;
+			bottom: 0px;
+			right: 0px;
+			width: 10%;
+			height: 100%;
+			background-color: cadetblue;
+			color: white;
+		}
+	</style>
+</head>
+<body>
+	<script src="js/jquery-1.9.1.js"></script>
+	<script src="js/Three.min.js"></script>
+	<script src="js/OrbitControls.js"></script>
+	<script src="js/ThreeBSP.js"></script>
+	<script src="js/Detector.js"></script>
+	<script src="js/Stats.js"></script>
+
+	<script src="js/THREEx.KeyboardState.js"></script>
+	<script src="js/THREEx.FullScreen.js"></script>
+	<script src="js/THREEx.WindowResize.js"></script>
+
+	<script src="js/three.js"></script>
+	<script src="js/DDSLoader.js"></script>
+	<script src="js/MTLLoader.js"></script>
+	<script src="js/OBJLoader.js"></script>
+	<script src="js/Detector.js"></script>
+	<script src="js/stats.min.js"></script>
+	<script src="js/PathControls.js"></script>
+	<script src="js/Tween.js"></script>
+	<script src="js/RequestAnimationFrame.js"></script>
+
+	<div id="ThreeJS" style="position: absolute; left: 0px; top: 0px;"></div>
+	<div id="tool">
+		</br></br>
+		<button id="runBtn" onclick="run()">点击足球开始运行FootBall</button>
+		</br></br>
+		<button id="stopBtn" onclick="stop()">点击足球停止运动FootBall</button>
+		</br></br>
+		<button id="baymaxRunX" onclick="baymaxRunX()">点击沿X轴移动BayMax</button>
+		</br></br>
+		<button id="baymaxRunZ" onclick="baymaxRunZ()">点击沿Z轴移动BayMax</button>
+	</div>
+
+	<script>
+		var scene, camera, renderer, controls, tween, door;
+		var keyboard = new THREEx.KeyboardState();
+		var clock = new THREE.Clock();
+		var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+		var VIEW_ANGLE = 75, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 10000;
+
+		//纹理贴图
+		var materialArrayA = [];
+		var materialArrayB = [];
+		var matArrayA = [];
+		var matArrayB = [];
+		var dummy = new THREE.Object3D();
+		var leftDummy = new THREE.Object3D();
+		var rightDummy = new THREE.Object3D();
+		var barcelonaDummy = new THREE.Object3D();
+		var madridDummy = new THREE.Object3D();
+		var dortmundDummy = new THREE.Object3D();
+		var gameDummy = new THREE.Object3D();
+		var reusDummy = new THREE.Object3D();
+		var messiDummy = new THREE.Object3D();
+		//BayMax组件
+		var group;
+
+		init();
+		animate();
+
+		//场景         
+		function initScene() {
+			scene = new THREE.Scene();
+		}
+
+		//相机
+		function initCamera() {
+			camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+			camera.position.set(0, 1000, 1800);
+			camera.lookAt(scene.position);
+			camera.lookAt(0, 0, 0);
+			scene.add(camera);
+		}
+
+		//渲染器
+		function initRender() {
+			if (Detector.webgl)
+				renderer = new THREE.WebGLRenderer({ antialias: true });
+			else
+				renderer = new THREE.CanvasRenderer();
+			renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+			container = document.getElementById('ThreeJS');
+			container.appendChild(renderer.domElement);
+			renderer.setClearColor(0xe5b62d, 1.0);
+		}
+
+		//事件
+		function initEvent() {
+			THREEx.WindowResize(renderer, camera);
+			THREEx.FullScreen.bindKey({ charCode: 'm'.charCodeAt(0) });
+		}
+
+		//控制
+		function initControls() {
+			controls = new THREE.OrbitControls(camera, renderer.domElement);
+		}
+
+		//光源
+		function initLight() {
+			var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+			directionalLight.position.set(0, 100, 0).normalize();
+			scene.add(directionalLight);
+			var ambient = new THREE.AmbientLight(0xffffff, 1); 
+			ambient.position.set(0, 0, 0);
+			scene.add(ambient);
+		}
+
+		//地板  
+		function createFloor() {
+			var loader = new THREE.TextureLoader();
+			loader.load("images/floor.jpg", function (texture) {
+				texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+				texture.repeat.set(2, 2);
+				var floorGeometry = new THREE.BoxGeometry(2500, 2000, 5);
+				var floorMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+				var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+				floor.position.y = -0.5;
+				floor.rotation.x = Math.PI / 2;
+				scene.add(floor);
+			});
+
+			//透明颜色
+			var glass_material = new THREE.MeshBasicMaterial({ color: 0XECF1F3 });
+			glass_material.opacity = 0.4;
+			glass_material.transparent = true;
+
+			//左侧外围的墙
+			var left_wall = returnWallObject(400, 300, 1500, 0, matArrayB, -801, 155, 0);
+			var left_cube = returnWallObject(20, 1100, 1100, 0, matArrayB, -801, 155, 0);
+			createResultBsp(left_wall, left_cube, 1);
+
+			//右侧外围的墙
+			var right_wall = returnWallObject(400, 300, 1500, 0, matArrayB, 801, 155, 0);
+			var right_cube = returnWallObject(20, 1100, 1100, 0, matArrayB, 801, 155, 0);
+			createResultBsp(right_wall, right_cube, 1);
+		}
+
+		//墙上挖门，通过两个几何体生成 BSP对象
+		function createResultBsp(bsp, less_bsp, mat) {
+			switch (mat) {
+				case 1:
+					var material = new THREE.MeshPhongMaterial({ color: 0x9cb2d1, specular: 0x9cb2d1, shininess: 30, transparent: true, opacity: 1 });
+					break;
+				case 2:
+					var material = new THREE.MeshPhongMaterial({ color: 0xafc0ca, specular: 0xafc0ca, shininess: 30, transparent: true, opacity: 1 });
+					break;
+				default:
+			}
+			var sphere1BSP = new ThreeBSP(bsp);
+			var cube2BSP = new ThreeBSP(less_bsp);
+			var resultBSP = sphere1BSP.subtract(cube2BSP);
+			var result = resultBSP.toMesh(material);
+			result.material.flatshading = THREE.FlatShading;
+			//重新计算几何体侧面法向量
+			result.geometry.computeFaceNormals();
+			result.geometry.computeVertexNormals();
+			//更新纹理
+			result.material.needsUpdate = true;
+			result.geometry.buffersNeedUpdate = true;
+			result.geometry.uvsNeedUpdate = true;
+			scene.add(result);
+		}
+
+		//墙
+		function createCubeWall(width, height, depth, angle, material, x, y, z) {
+			var cubeGeometry = new THREE.BoxGeometry(width, height, depth);
+			var cube = new THREE.Mesh(cubeGeometry, material);
+			cube.position.x = x;
+			cube.position.y = y;
+			cube.position.z = z;
+			cube.rotation.y += angle * Math.PI;
+			scene.add(cube);
+		}
+
+		//返回墙对象
+		function returnWallObject(width, height, depth, angle, material, x, y, z) {
+			var cubeGeometry = new THREE.BoxGeometry(width, height, depth);
+			var cube = new THREE.Mesh(cubeGeometry, material);
+			cube.position.x = x;
+			cube.position.y = y;
+			cube.position.z = z;
+			cube.rotation.y += angle * Math.PI;
+			return cube;
+		}
+
+		//墙纹理
+		function createWallMaterail() {
+			matArrayA.push(new THREE.MeshPhongMaterial({ color: 0xafc0ca }));  //前  0xafc0ca: 灰色
+			matArrayA.push(new THREE.MeshPhongMaterial({ color: 0xafc0ca }));  //后  
+			matArrayA.push(new THREE.MeshPhongMaterial({ color: 0xd6e4ec }));  //上  0xd6e4ec：偏白色
+			matArrayA.push(new THREE.MeshPhongMaterial({ color: 0xd6e4ec }));  //下  
+			matArrayA.push(new THREE.MeshPhongMaterial({ color: 0xafc0ca }));  //左  0xafc0ca: 灰色
+			matArrayA.push(new THREE.MeshPhongMaterial({ color: 0xafc0ca }));  //右
+
+			matArrayB.push(new THREE.MeshPhongMaterial({ color: 0xafc0ca }));  //前  0xafc0ca: 灰色
+			matArrayB.push(new THREE.MeshPhongMaterial({ color: 0x9cb2d1 }));  //后  0x9cb2d1：淡紫
+			matArrayB.push(new THREE.MeshPhongMaterial({ color: 0xd6e4ec }));  //上  0xd6e4ec：偏白色
+			matArrayB.push(new THREE.MeshPhongMaterial({ color: 0xd6e4ec }));  //下  
+			matArrayB.push(new THREE.MeshPhongMaterial({ color: 0xafc0ca }));  //左  0xafc0ca: 灰色
+			matArrayB.push(new THREE.MeshPhongMaterial({ color: 0xafc0ca }));  //右
+		}
+
+		//房间布局
+		function createLayout() {
+			// 墙面 1 左一
+			createCubeWall(10, 300, 1500, 0, matArrayB, -600, 155, 0);
+			// 墙面 2 右一
+			createCubeWall(15, 300, 1500, 1, matArrayB, 600, 155, 0);
+			// 墙面 3 门对面的墙
+			createCubeWall(15, 300, 1200, 1.5, matArrayB, 5, 155, -700);
+			// 墙面 4 带门的面  
+			var wall = returnWallObject(1200, 300, 10, 0, matArrayB, 5, 155, 455);
+			// 门框 
+			var door_cube = returnWallObject(140, 260, 10, 0, matArrayB, 0, 90, 455);
+			createResultBsp(wall, door_cube, 1);
+
+			//正门墙面安装门
+			var loader = new THREE.TextureLoader();
+			loader.load("images/door_right.png", function (texture) {
+				var doorgeometry = new THREE.BoxGeometry(140, 220, 2);
+				var doormaterial = new THREE.MeshBasicMaterial({ map: texture, color: 0xffffff });
+				doormaterial.opacity = 1.0;
+				doormaterial.transparent = true;
+				door = new THREE.Mesh(doorgeometry, doormaterial);
+				door.position.set(-50, 0, 0);
+				var door1 = door.clone();
+				door1.position.set(50, 0, 0);
+				door1.visible = false;
+				dummy.add(door);
+				dummy.add(door1);
+				dummy.position.set(50, 110, 451)
+				scene.add(dummy);
+			});
+
+			//左房间墙门
+			var leftLoader = new THREE.TextureLoader();
+			leftLoader.load("images/wall_door.jfif", function (texture) {
+				var doorgeometry = new THREE.BoxGeometry(150, 200, 5);
+				var doormaterial = new THREE.MeshBasicMaterial({ map: texture, color: 0xffffff });
+				doormaterial.opacity = 1.0;
+				doormaterial.transparent = true;
+				door = new THREE.Mesh(doorgeometry, doormaterial);
+				door.position.set(-50, 0, 0);
+				var door1 = door.clone();
+				door1.position.set(50, 0, 0);
+				door1.visible = false;
+				leftDummy.add(door);
+				leftDummy.add(door1);
+				leftDummy.position.set(-750, 100, 750)
+				scene.add(leftDummy);
+			});
+
+			//右房间墙门
+			var rightLoader = new THREE.TextureLoader();
+			rightLoader.load("images/wall_door.jfif", function (texture) {
+				var doorgeometry = new THREE.BoxGeometry(150, 200, 5);
+				var doormaterial = new THREE.MeshBasicMaterial({ map: texture, color: 0xffffff });
+				doormaterial.opacity = 1.0;
+				doormaterial.transparent = true;
+				door = new THREE.Mesh(doorgeometry, doormaterial);
+				door.position.set(-50, 0, 0);
+				var door1 = door.clone();
+				door1.position.set(50, 0, 0);
+				door1.visible = false;
+				rightDummy.add(door);
+				rightDummy.add(door1);
+				rightDummy.position.set(860, 100, 750)
+				scene.add(rightDummy);
+			});
+
+			//球门贴图
+			var barcelonaLoader = new THREE.TextureLoader();
+			barcelonaLoader.load("images/ball_door.jpg", function (texture) {
+				var barcelonaGeometry = new THREE.BoxGeometry(1180, 300, 5);
+				var barcelonaMaterial = new THREE.MeshBasicMaterial({ map: texture, color: 0xffffff });
+				barcelonaMaterial.opacity = 1.0;
+				barcelonaMaterial.transparent = true;
+				barcelona = new THREE.Mesh(barcelonaGeometry, barcelonaMaterial);
+				barcelona.position.set(-50, 0, 0);
+				barcelonaDummy.add(barcelona);
+				barcelonaDummy.position.set(55, 150, -690)
+				scene.add(barcelonaDummy);
+			});
+
+			//巴萨罗那贴图
+			var madridLoader = new THREE.TextureLoader();
+			madridLoader.load("images/Barcelona.jfif", function (texture) {
+				var madridGeometry = new THREE.BoxGeometry(1150, 300, 5);
+				var madridMaterial = new THREE.MeshBasicMaterial({ map: texture, color: 0xffffff });
+				madridMaterial.opacity = 1.0;
+				madridMaterial.transparent = true;
+				madrid = new THREE.Mesh(madridGeometry, madridMaterial);
+				madrid.position.set(-50, 0, 0);
+				madrid.rotation.y += 0.5 * Math.PI;
+				madridDummy.add(madrid);
+				madridDummy.position.set(640, 150, -120)
+				scene.add(madridDummy);
+			});
+
+			//尤文图斯贴图
+			var dortmundLoader = new THREE.TextureLoader();
+			dortmundLoader.load("images/Juventus.jpg", function (texture) {
+				var dortmundGeometry = new THREE.BoxGeometry(1150, 300, 5);
+				var dortmundMaterial = new THREE.MeshBasicMaterial({ map: texture, color: 0xffffff });
+				dortmundMaterial.opacity = 1.0;
+				dortmundMaterial.transparent = true;
+				dortmund = new THREE.Mesh(dortmundGeometry, dortmundMaterial);
+				dortmund.position.set(-50, 0, 0);
+				dortmund.rotation.y -= 0.5 * Math.PI;
+				dortmundDummy.add(dortmund);
+				dortmundDummy.position.set(-540, 150, -120)
+				scene.add(dortmundDummy);
+			});
+
+			//大门前贴图
+			var gameLoader = new THREE.TextureLoader();
+			gameLoader.load("images/game.jpg", function (texture) {
+				var gameGeometry = new THREE.BoxGeometry(700, 250, 20);
+				var gameMaterial = new THREE.MeshBasicMaterial({ map: texture, color: 0xffffff });
+				gameMaterial.opacity = 1.0;
+				gameMaterial.transparent = true;
+				game = new THREE.Mesh(gameGeometry, gameMaterial);
+				game.position.set(-50, 0, 0);
+				gameDummy.add(game);
+				gameDummy.position.set(60, 125, 800)
+				scene.add(gameDummy);
+			});
+
+			//C罗海报
+			var reusLoader = new THREE.TextureLoader();
+			reusLoader.load("images/Ronaldo.jpg", function (texture) {
+				var reusGeometry = new THREE.BoxGeometry(400, 1500, 20);
+				var reusMaterial = new THREE.MeshBasicMaterial({ map: texture, color: 0xffffff });
+				reusMaterial.opacity = 1.0;
+				reusMaterial.transparent = true;
+				reus = new THREE.Mesh(reusGeometry, reusMaterial);
+				reus.position.set(-50, 0, 0);
+				reus.rotation.x -= 0.5 * Math.PI;
+				reusDummy.add(reus);
+				reusDummy.position.set(-748, 315, 0)
+				scene.add(reusDummy);
+			});
+
+			//梅西海报
+			var messiLoader = new THREE.TextureLoader();
+			messiLoader.load("images/Messi.jpg", function (texture) {
+				var messiGeometry = new THREE.BoxGeometry(400, 1500, 20);
+				var messiMaterial = new THREE.MeshBasicMaterial({ map: texture, color: 0xffffff });
+				messiMaterial.opacity = 1.0;
+				messiMaterial.transparent = true;
+				messi = new THREE.Mesh(messiGeometry, messiMaterial);
+				messi.position.set(-50, 0, 0);
+				messi.rotation.x -= 0.5 * Math.PI;
+				messiDummy.add(messi);
+				messiDummy.position.set(850, 315, 0)
+				scene.add(messiDummy);
+			});
+
+			//Football
+			var football = new THREE.SphereGeometry(50, 32, 32);
+			var texture = THREE.ImageUtils.loadTexture("images/football.jpg", null, function (t) { });
+			var footballMaterial = new THREE.MeshBasicMaterial({ map: texture });
+			footballMesh = new THREE.Mesh(football, footballMaterial);
+			footballMesh.position.set(50, 52, 45);
+			scene.add(footballMesh);
+
+			//BayMax
+			var head = new THREE.SphereGeometry(30, 30, 30);
+			var baymaxTexture = THREE.ImageUtils.loadTexture("images/baymax.jfif", null, function (t) { });
+			var baymaxMaterial = new THREE.MeshBasicMaterial({ map: baymaxTexture });
+			var headMesh = new THREE.Mesh(head, baymaxMaterial);
+			headMesh.position.set(-70, 220, 900);
+			headMesh.scale.set(1.5, 1, 1.5);
+
+			var abdomen = new THREE.SphereGeometry(30, 30, 30);
+			var abdomenMesh = new THREE.Mesh(abdomen, baymaxMaterial);
+			abdomenMesh.position.set(-70, 130, 900);
+			abdomenMesh.scale.set(2.4, 2.4, 2.4);
+
+			var leftHand = new THREE.SphereGeometry(30, 30, 30);
+			var leftHandMesh = new THREE.Mesh(leftHand, baymaxMaterial);
+			leftHandMesh.position.set(-120, 140, 900);
+			leftHandMesh.scale.set(1, 2, 1);
+			leftHandMesh.rotateZ(-500);
+
+			var rightHand = new THREE.SphereGeometry(30, 30, 30);
+			var rightHandMesh = new THREE.Mesh(rightHand, baymaxMaterial);
+			rightHandMesh.position.set(-17, 140, 900);
+			rightHandMesh.scale.set(1, 2, 1);
+			rightHandMesh.rotateZ(500);
+
+			var leftFoot = new THREE.SphereGeometry(25, 20, 25);
+			var leftFootMesh = new THREE.Mesh(leftFoot, baymaxMaterial);
+			leftFootMesh.position.set(-45, 70, 900);
+			leftFootMesh.scale.set(1, 2.5, 1);
+
+			var rightFoot = new THREE.SphereGeometry(25, 20, 25);
+			var rightFootMesh = new THREE.Mesh(rightFoot, baymaxMaterial);
+			rightFootMesh.position.set(-90, 70, 900);
+			rightFootMesh.scale.set(1, 2.5, 1);
+
+			var leftEye = new THREE.SphereGeometry(5, 5, 5);
+			var leftEyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+			var leftEyeMesh = new THREE.Mesh(leftEye, leftEyeMaterial);
+			leftEyeMesh.position.set(-80, 220, 856);
+			leftEyeMesh.scale.set(1, 1, 1);
+
+			var rightEye = new THREE.SphereGeometry(5, 5, 5);
+			var rightEyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+			var rightEyeMesh = new THREE.Mesh(rightEye, rightEyeMaterial);
+			rightEyeMesh.position.set(-50, 220, 855);
+			rightEyeMesh.scale.set(1, 1, 1);
+
+			//BayMax组件
+			group = new THREE.Group();
+			group.add(headMesh);
+			group.add(abdomenMesh);
+			group.add(leftHandMesh);
+			group.add(rightHandMesh);
+			group.add(leftFootMesh);
+			group.add(rightFootMesh);
+			group.add(leftEyeMesh);
+			group.add(rightEyeMesh);
+			group.position.set(100, 0, 100);
+			scene.add(group);
+		}
+
+		//初始化 OBJ对象
+		function initObject() {
+			createWallMaterail();
+			createFloor();
+			createLayout();
+		}
+
+		//初始化函数 		
+		function init() {
+			initScene();
+			initCamera();
+			initRender();
+			initEvent();
+			initControls();
+			initLight();
+			initObject();
+			//监听键盘按键
+			document.addEventListener("keydown", onkeyDown, false);
+		}
+
+		//控制大门开关
+		var door_state = true;
+		//Enter=13, Space=32;
+		function onkeyDown(event) {
+			switch (event.keyCode) {
+				case 13:
+					console.log(event.keyCode);
+					if (door_state) {
+						dummy.rotation.y += 0.5 * Math.PI;
+						door_state = false;
+					} else {
+						dummy.rotation.y -= 0.5 * Math.PI;
+						door_state = true;
+					}
+					break;
+				default:
+					console.log(event.keyCode);
+					break;
+			}
+		}
+
+		//控制足球运动
+		var footballFlag = true;
+		function run() {
+			footballFlag = true;
+		}
+		function stop() {
+			footballFlag = false;
+		}
+		function footballRun() {
+			if (footballFlag) {
+				footballMesh.rotation.x += 0.05;
+				footballMesh.rotation.y += 0.05;
+			}
+		}
+
+		//控制 BayMax运动
+		function baymaxRunX() {
+			group.translateX(10);
+		}
+		function baymaxRunZ() {
+			group.translateZ(-10);
+		}
+		function baymaxRun() {
+			baymaxRunX();
+			baymaxRunZ();
+		}
+
+		function animate() {
+			footballRun();
+			if (keyboard.pressed("down"))
+				group.translateZ(5);
+			if (keyboard.pressed("up"))
+				group.translateZ(-5);
+			if (keyboard.pressed("left"))
+				group.translateX(-5);
+			if (keyboard.pressed("right"))
+				group.translateX(5);
+			requestAnimationFrame(animate);
+			renderer.render(scene, camera);
+			TWEEN.update();
+			update();
+		}
+
+		function update() {
+			var delta = clock.getDelta();
+			var moveDistance = 200 * delta;
+			var rotateAngle = Math.PI / 2 * delta;
+			controls.update();
+		}
+	</script>
+</body>
+</html>
