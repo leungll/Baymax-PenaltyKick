@@ -54,6 +54,9 @@
 - 初始页面
 
     ![initial-page](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/initial-page.jpg)
+- 俯瞰场景
+
+    ![overlook](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/overlook.jpg)
 - `Baymax` 罚点球
 
     ![penalty-kick](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/penalty-kick.jpg)
