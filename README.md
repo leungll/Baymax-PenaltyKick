@@ -75,5 +75,5 @@
 
 ## References
 - [WebGL中文网](http://www.hewebgl.com/)
-- [three.js Github库](https://github.com/mrdoob/three.js/)
+- [three.js Github库](https://github.com/mrdoob/three.js)
 - [jiym. 使用three.js搭建室内场景. 2018. CSDN](https://blog.csdn.net/u014529917/article/details/82801737)
