@@ -36,7 +36,7 @@
 
 ## 相关资源
 - Three.js库：路径 `Baymax-PenaltyKick/js`
-    - 完整的 `Three.js库`：https://github.com/mrdoob/three.js/
+    - 完整的 `Three.js库`：https://github.com/mrdoob/three.js
 - 服务器配置：见文档 `Apache安装及配置.docx`
 
 ## 编译 & 运行
@@ -74,6 +74,6 @@
     ![东京小屋](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/tokyo.jpg)
 
 ## References
-- [WebGL中文网](http://www.hewebgl.com/)
+- [WebGL中文网](http://www.hewebgl.com)
 - [three.js Github库](https://github.com/mrdoob/three.js)
 - [jiym. 使用three.js搭建室内场景. 2018. CSDN](https://blog.csdn.net/u014529917/article/details/82801737)
