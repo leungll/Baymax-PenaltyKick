@@ -1,5 +1,5 @@
 # 基于图形引擎的软件开发-期末课设
-**Baymax-PenaltyKick** for Software Development Based on Graphics Engine, Spring 2020, NENU 
+**Baymax-PenaltyKick**, Software Development Based on Graphics Engine course, 2020 Spring, NENU 
 
 ![Passing](https://img.shields.io/badge/JavaScript-passing-red)
 ![Server](https://img.shields.io/badge/Server-Apache24-success)
