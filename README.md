@@ -53,25 +53,29 @@
 ## 页面截图
 - 初始页面
 
-    ![initial-page](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/initial-page.jpg)
+    ![baymax-penalty-1](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/baymax-penalty-1.jpg)
+  
 - 俯瞰场景
 
-    ![overlook](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/overlook.jpg)
+    ![baymax-penalty-2](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/baymax-penalty-2.jpg)
+  
 - `Baymax` 罚点球
 
-    ![penalty-kick](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/penalty-kick.jpg)
+    ![baymax-penalty-3](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/baymax-penalty-3.jpg)
+  
 - 进门视角
 
-    ![enter-door](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/enter-door.jpg)
+    ![baymax-penalty-4](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/baymax-penalty-4.jpg)
+  
 - 进门视角2
 
-    ![enter-door2](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/enter-door2.jpg)
+    ![baymax-penalty-5](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/baymax-penalty-5.jpg)
 
 ## 待改善之处
 - 键盘事件存在瑕疵：当按下 `UP`、`DOWN`、`LEFT`、`RIGHT` 键控制 `Baymax` 移动时，页面也会上下左右移动，影响体验。
 - 无法引进 `3D模型` ：尝试在场景中加载 `东京小屋` 模型，经过几天尝试，会出现黑屏、无法加载等 bug，未果。希望有时间能继续改善。
 
-    ![东京小屋](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/tokyo.jpg)
+    ![baymax-penalty-6](https://cdn.jsdelivr.net/gh/leungll/ImgHosting/img/baymax-penalty-6.jpg)
 
 ## References
 - [WebGL中文网](http://www.hewebgl.com)
